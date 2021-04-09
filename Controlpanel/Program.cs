@@ -44,7 +44,7 @@ namespace Controlpanel
         private static void Main()
         {
             // Change the title
-            Console.Title = "Glitchless' Controlpanel";
+            Console.Title = "qBait's Controlpanel";
 
             Console.CursorVisible = false;
 
@@ -443,7 +443,7 @@ namespace Controlpanel
 
             // Menu
             Console.ForegroundColor = ConsoleColor.DarkRed;
-            Console.WriteLine("Welcome to Glitchless' Controlpanel");
+            Console.WriteLine("Welcome to qBait's Controlpanel");
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("***********************************");
             Console.WriteLine("Logged in as: " + decodedUsername);
