@@ -8,17 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <COMReference Include="VBIDE.dll">
-      <Guid>0002e157-0000-0000-c000-000000000046</Guid>
-      <VersionMajor>5</VersionMajor>
-      <VersionMinor>3</VersionMinor>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Lcid>0</Lcid>
-      <Isolated>false</Isolated>
-    </COMReference>
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
 
