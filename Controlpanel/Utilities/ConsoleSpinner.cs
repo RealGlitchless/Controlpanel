@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Controlpanel
+namespace Controlpanel.Utilities
 {
     public class ConsoleSpinner
     {

@@ -20,11 +20,15 @@ namespace Controlpanel.Menus
                 Console.WriteLine("6: Disks");
                 Console.WriteLine("0: Go back");
                 Console.WriteLine("Press a number between 1-6 to get more info");
+                Console.WriteLine("***********************************\n");
                 char option = Console.ReadKey().KeyChar;
-                Console.WriteLine("\n***********************************\n");
                 if (option == '0')
-                    return;
+                    break;
+                Console.SetCursorPosition(0, 11);
                 PrintOptions(option);
+                Console.WriteLine("***********************************\n");
+                Console.WriteLine("Press anything to return to menu");
+                char _ = Console.ReadKey().KeyChar;
             }
         }
 
@@ -60,9 +64,6 @@ namespace Controlpanel.Menus
                     Console.WriteLine("Please press a valid key");
                     break;
             }
-
-            Console.ReadKey();
-            PrintMenu();
         }
         
         private void PrintOS()
@@ -70,9 +71,8 @@ namespace Controlpanel.Menus
             ManagementObjectSearcher os = new ManagementObjectSearcher("SELECT * FROM Win32_OperatingSystem");
             foreach (ManagementBaseObject win in os.Get())
             {
-                Console.WriteLine("OSType: " + win["OSType"]);
-                Console.WriteLine("Version: " + win["Version"]);
                 Console.WriteLine("OS Name: " + win["Caption"]);
+                Console.WriteLine("Version: " + win["Version"]);
                 Console.WriteLine("Build Number: " + win["BuildNumber"]);
             }
         }

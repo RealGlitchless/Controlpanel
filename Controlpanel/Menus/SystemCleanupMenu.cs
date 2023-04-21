@@ -3,10 +3,11 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Controlpanel.Utilities;
 
-namespace Controlpanel.Utilities
+namespace Controlpanel.Menus
 {
-    public class SystemCleanup
+    public class SystemCleanupMenu
     {
         // Importing shell32.dll
         [DllImport("Shell32.dll", CharSet = CharSet.Unicode)]
@@ -17,20 +18,12 @@ namespace Controlpanel.Utilities
             Console.Clear();
             DirectoryInfo tempDirectory = FindTemp();
             float initialSize = GetTempSize(tempDirectory);
-            
+
             EmptyTemp(tempDirectory);
-            
+
             float newSize = GetTempSize(tempDirectory);
-            float deletedSize = initialSize - newSize;
 
-            Console.WriteLine("Deleting temp files and folders");
-            string sizeMessage = $"There has been deleted {deletedSize:N0}MB from the Temp folder";
-
-            if (deletedSize >= 1024)
-            {
-                decimal gbSize = Math.Round(Convert.ToDecimal(deletedSize / 1024), 2);
-                sizeMessage = $"There has been deleted {gbSize:N2}GB from the Temp folder";
-            }
+            string sizeMessage = GetDeletedSize(initialSize, newSize);
 
             Console.WriteLine(sizeMessage);
 
@@ -72,9 +65,9 @@ namespace Controlpanel.Utilities
                     // Deletes the file
                     file.Delete();
                 }
-                catch (Exception)
+                catch
                 {
-                    // Ignore the failure and continue
+                    // ignored
                 }
             }
             // Delete folders
@@ -92,7 +85,7 @@ namespace Controlpanel.Utilities
                 }
             }
         }
-        
+
         private DirectoryInfo FindTemp()
         {
             Console.WriteLine("Finding Temp folder");
@@ -100,10 +93,35 @@ namespace Controlpanel.Utilities
             Console.WriteLine("Temp folder found");
             return temp;
         }
-        
+
         private float GetTempSize(DirectoryInfo temp)
         {
             return temp.GetFiles("*", SearchOption.AllDirectories).Aggregate<FileInfo, long>(0, (current, fi) => current + fi.Length);
+        }
+
+        private string GetDeletedSize(float initialSize, float newSize)
+        {
+            float deletedSize = initialSize - newSize;
+
+            string sizeMessage = "";
+
+            if (deletedSize <= 0)
+            {
+                sizeMessage = "No files were deleted";            }
+            else if (deletedSize < 1000000)
+            {
+                sizeMessage = $"Deleted {deletedSize / 1000} KB";
+            }
+            else if (deletedSize < 1000000000)
+            {
+                sizeMessage = $"Deleted {deletedSize / 1000000} MB";
+            }
+            else if (deletedSize < 100000000000)
+            {
+                sizeMessage = $"Deleted {deletedSize / 1000000000} GB";
+            }
+
+            return sizeMessage;
         }
     }
 }

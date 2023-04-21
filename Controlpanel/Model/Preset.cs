@@ -2,13 +2,10 @@
 {
     public class Preset
     {
-        private string _name;
-        private string _URL;
-        
-        public Preset(string name, string URL)
+        public Preset(string name, string url)
         {
-            _name = name;
-            _URL = URL;
+            Name = name;
+            URL = url;
         }
         
         public string Name { get; set; }

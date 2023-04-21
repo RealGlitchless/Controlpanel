@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Controlpanel.Menus.Casino;
 using Controlpanel.Model;
-using Controlpanel.Utilities;
 
 namespace Controlpanel.Menus
 {
@@ -21,7 +21,7 @@ namespace Controlpanel.Menus
             _account = account;
         }
 
-        public void printMenu()
+        public void PrintMenu()
         {
             List<Preset> presets = _account.Presets;
 
@@ -35,7 +35,7 @@ namespace Controlpanel.Menus
             for(int i = 0; i < option; i++)
             {
                 Console.Write($"{i+1}: ");
-                Console.Write(presets[i].Name);
+                Console.WriteLine(presets[i].Name);
             }
             Console.Write($"{option+1}: ");
             Console.WriteLine("Create Preset");
@@ -44,7 +44,7 @@ namespace Controlpanel.Menus
             Console.Write($"{option+3}: ");
             Console.WriteLine("Enter Casino");
             Console.Write($"{option+4}: ");
-            Console.WriteLine("See Hardware Information //Not done");
+            Console.WriteLine("See Hardware Information");
             Console.Write($"{option+5}: ");
             Console.WriteLine("Settings");
             Console.Write($"{option+6}: ");
@@ -56,6 +56,7 @@ namespace Controlpanel.Menus
             Console.WriteLine("***********************************");
             while(!Console.KeyAvailable)
             {
+                Console.SetCursorPosition(0, option + 13);
                 printSystemInfo();
             }
             SelectOption();
@@ -63,7 +64,6 @@ namespace Controlpanel.Menus
 
     private void SelectOption()
     {
-        Console.Clear();
         var presets = _account.Presets;
         var option = presets.Count + 8; // Number of options in the menu
         var selectedOption = 0;
@@ -89,53 +89,54 @@ namespace Controlpanel.Menus
             var preset = presets[selectedOption - 1];
             Process.Start(preset.URL);
         }
-        else if (selectedOption == option - 6)
+        else if (selectedOption == option - 7)
         {
             // User selected "Create Preset"
-            new CreatePresetMenu(_account).printMenu();
+            new CreatePresetMenu(_account).PrintMenu();
+        }
+        else if (selectedOption == option - 6)
+        {
+            // User selected "Clean PC"
+            new SystemCleanupMenu().Start();
         }
         else if (selectedOption == option - 5)
         {
-            // User selected "Clean PC"
-            new SystemCleanup().Start();
+            // User selected "Enter Casino"
+            new CasinoMenu(_account).PrintMenu();
         }
         else if (selectedOption == option - 4)
-        {
-            // User selected "Enter Casino"
-            // TODO: Implement the logic for entering the casino
-        }
-        else if (selectedOption == option - 3)
         {
             // User selected "See Hardware Information"
             new SystemInfoMenu().PrintMenu();
         }
-        else if (selectedOption == option - 2)
+        else if (selectedOption == option - 3)
         {
             // User selected "Settings"
             new AccountMenu(_account).PrintMenu();
         }
-        else if (selectedOption == option - 1)
+        else if (selectedOption == option - 2)
         {
             // User selected "Exit Controlpanel"
             exit();
         }
-        else if (selectedOption == option)
+        else if (selectedOption == option - 1)
         {
             // User selected "Restart PC"
             restart();
         }
-        else
+        else if (selectedOption == option)
         {
             // User selected "Shutdown PC"
             shutdown();
+        }
+        else
+        {
+            Console.WriteLine("Invalid input");
         }
     }
 
     private void printSystemInfo()
         {
-            // Writes after the menu
-            Console.SetCursorPosition(0, 10);
-
             // Gets the date and write
             string day = DateTime.Today.ToString("D");
             Console.WriteLine($"The date is {day}");

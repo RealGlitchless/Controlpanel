@@ -2,6 +2,7 @@
 using System.Threading;
 using Controlpanel.Controller;
 using Controlpanel.Model;
+using Controlpanel.Utilities;
 
 namespace Controlpanel.Menus
 {
@@ -14,7 +15,7 @@ namespace Controlpanel.Menus
             _accountController = new AccountController();
         }
         
-        public Account printMenu()
+        public Account PrintMenu()
         {
             Account account = null;
             while (account == null)
@@ -29,7 +30,7 @@ namespace Controlpanel.Menus
                 switch (choice)
                 {
                     case "1":
-                        account = printLogin();
+                        account = PrintLogin();
                         break;
                     case "2":
                         new CreateAccountMenu().printCreateAccount();
@@ -47,7 +48,7 @@ namespace Controlpanel.Menus
             return account;
         }
         
-        private Account printLogin()
+        private Account PrintLogin()
         {
             Console.Clear();
             Account account = null;
@@ -78,7 +79,7 @@ namespace Controlpanel.Menus
             {
                 return false;
             }
-            return account.Password == Obfuscator.encode(password);
+            return account.Password == password;
         }
         
         private string RedactPassword()

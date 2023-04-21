@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace Controlpanel
+namespace Controlpanel.Utilities
 {
     public abstract class Obfuscator
     {

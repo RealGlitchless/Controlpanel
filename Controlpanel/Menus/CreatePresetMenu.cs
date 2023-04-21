@@ -14,7 +14,7 @@ namespace Controlpanel.Menus
             _user = user;
         }
 
-        public void printMenu()
+        public void PrintMenu()
         {
             Console.Clear();
             Console.WriteLine("What program do you want as shortcut?");
