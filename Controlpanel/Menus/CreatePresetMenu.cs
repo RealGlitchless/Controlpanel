@@ -3,7 +3,7 @@ using System.Threading;
 using Controlpanel.Controller;
 using Controlpanel.Model;
 
-namespace Controlpanel
+namespace Controlpanel.Menus
 {
     public class CreatePresetMenu
     {

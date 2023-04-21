@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using Controlpanel.Controller;
-using Controlpanel.Menus;
 using Controlpanel.Model;
 
-namespace Controlpanel
+namespace Controlpanel.Menus
 {
     public class LoginMenu
     {

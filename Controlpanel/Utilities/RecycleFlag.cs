@@ -1,4 +1,4 @@
-﻿namespace Controlpanel
+﻿namespace Controlpanel.Utilities
 {
     public enum RecycleFlag
     {
