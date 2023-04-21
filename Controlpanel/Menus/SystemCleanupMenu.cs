@@ -5,123 +5,125 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Controlpanel.Utilities;
 
-namespace Controlpanel.Menus
+namespace Controlpanel.Menus;
+
+public static class SystemCleanupMenu
 {
-    public class SystemCleanupMenu
+    // Importing shell32.dll
+    [DllImport("Shell32.dll", CharSet = CharSet.Unicode)]
+    private static extern uint SHEmptyRecycleBin(IntPtr hwnd, string pszRootPath, RecycleFlag dwFlags);
+
+    public static void Start()
     {
-        // Importing shell32.dll
-        [DllImport("Shell32.dll", CharSet = CharSet.Unicode)]
-        private static extern uint SHEmptyRecycleBin(IntPtr hwnd, string pszRootPath, RecycleFlag dwFlags);
+        Console.Clear();
+        DirectoryInfo tempDirectory = FindTemp();
+        float initialSize = GetTempSize(tempDirectory);
 
-        public void Start()
+        EmptyTemp(tempDirectory);
+
+        float newSize = GetTempSize(tempDirectory);
+
+        string sizeMessage = GetDeletedSize(initialSize, newSize);
+
+        Console.WriteLine(sizeMessage);
+
+        Thread.Sleep(1000);
+
+        // Emptying the recycle bin
+        Console.WriteLine("Emptying the recycle bin");
+        Thread.Sleep(500);
+
+        uint result = SHEmptyRecycleBin(IntPtr.Zero, null, RecycleFlag.SHERB_NOCONFIRMATION);
+        if (result == 0)
         {
-            Console.Clear();
-            DirectoryInfo tempDirectory = FindTemp();
-            float initialSize = GetTempSize(tempDirectory);
-
-            EmptyTemp(tempDirectory);
-
-            float newSize = GetTempSize(tempDirectory);
-
-            string sizeMessage = GetDeletedSize(initialSize, newSize);
-
-            Console.WriteLine(sizeMessage);
-
-            Thread.Sleep(1000);
-
-            // Emptying the recycle bin
-            Console.WriteLine("Emptying the recycle bin");
-            Thread.Sleep(500);
-
-            uint result = SHEmptyRecycleBin(IntPtr.Zero, null, RecycleFlag.SHERB_NOCONFIRMATION);
-            if (result == 0)
-            {
-                Console.WriteLine("Recycle bin is already empty, nothing has been done");
-                Thread.Sleep(2000);
-            }
-            // if there is nothing to empty
-            else
-            {
-                Console.WriteLine("Files in the recycle bin has been deleted");
-                Thread.Sleep(1500);
-            }
-
-            // Done
-            Console.WriteLine("Everything is done and your PC has been cleaned!");
-            Console.WriteLine("Press any key to return to the menu");
-            Console.ReadKey();
+            Console.WriteLine("Recycle bin is already empty, nothing has been done");
+            Thread.Sleep(2000);
+        }
+        else
+        {
+            Console.WriteLine("Files in the recycle bin has been deleted");
+            Thread.Sleep(1500);
         }
 
-        private static void EmptyTemp(DirectoryInfo temp)
+        Console.WriteLine("Everything is done and your PC has been cleaned!");
+        Console.WriteLine("Press any key to return to the menu");
+        Console.ReadKey();
+    }
+
+    private static void EmptyTemp(DirectoryInfo temp)
+    {
+        ConsoleSpinner spinner = new();
+
+        foreach (FileInfo file in temp.EnumerateFiles())
         {
-            ConsoleSpinner spinner = new ConsoleSpinner();
+            spinner.UpdateProgress();
 
-            foreach (FileInfo file in temp.EnumerateFiles())
-            {
-                spinner.UpdateProgress();
-                // Will try to delete the file
-                try
-                {
-                    // Deletes the file
-                    file.Delete();
-                }
-                catch
-                {
-                    // ignored
-                }
-            }
-            // Delete folders
-            foreach (DirectoryInfo dir in temp.EnumerateDirectories())
-            {
-                // Will try and delete folder
-                try
-                {
-                    // Deletes folder
-                    dir.Delete(true);
-                }
-                catch (Exception)
-                {
-                    // Ignore the failure and continue
-                }
-            }
+            // Try to delete the file
+            Console.WriteLine(
+                TryDeleteFile(file) ? $"Deleted file: {file.Name}" : $"Failed to delete file: {file.Name}");
         }
-
-        private DirectoryInfo FindTemp()
+        // Delete folders
+        foreach (DirectoryInfo dir in temp.EnumerateDirectories())
         {
-            Console.WriteLine("Finding Temp folder");
-            DirectoryInfo temp = new DirectoryInfo(Path.GetTempPath());
-            Console.WriteLine("Temp folder found");
-            return temp;
+            // Try to delete the directory
+            Console.WriteLine(TryDeleteDirectory(dir)
+                ? $"Deleted directory: {dir.Name}"
+                : $"Failed to delete directory: {dir.Name}");
         }
+    }
 
-        private float GetTempSize(DirectoryInfo temp)
+    private static bool TryDeleteFile(FileInfo file)
+    {
+        try
         {
-            return temp.GetFiles("*", SearchOption.AllDirectories).Aggregate<FileInfo, long>(0, (current, fi) => current + fi.Length);
+            file.Delete();
+            return true;
         }
-
-        private string GetDeletedSize(float initialSize, float newSize)
+        catch (Exception)
         {
-            float deletedSize = initialSize - newSize;
-
-            string sizeMessage = "";
-
-            if (deletedSize <= 0)
-            {
-                sizeMessage = "No files were deleted";            }
-            else if (deletedSize < 1000000)
-            {
-                sizeMessage = $"Deleted {deletedSize / 1000} KB";
-            }
-            else if (deletedSize < 1000000000)
-            {
-                sizeMessage = $"Deleted {deletedSize / 1000000} MB";
-            }
-            else if (deletedSize < 100000000000)
-            {
-                sizeMessage = $"Deleted {deletedSize / 1000000000} GB";
-            }
-
-            return sizeMessage;
+            return false;
         }
+    }
+
+    private static bool TryDeleteDirectory(DirectoryInfo dir)
+    {
+        try
+        {
+            dir.Delete(true);
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    private static DirectoryInfo FindTemp()
+    {
+        Console.WriteLine("Finding Temp folder");
+        DirectoryInfo temp = new(Path.GetTempPath());
+        Console.WriteLine("Temp folder found");
+        return temp;
+    }
+
+    private static float GetTempSize(DirectoryInfo temp)
+    {
+        return temp.GetFiles("*", SearchOption.AllDirectories).Aggregate<FileInfo, long>(0, (current, fi) => current + fi.Length);
+    }
+
+    private static string GetDeletedSize(float initialSize, float newSize)
+    {
+        float deletedSize = initialSize - newSize;
+
+        string sizeMessage = deletedSize switch
+        {
+            <= 0 => "No files were deleted",
+            < 1000000 => $"Deleted {deletedSize / 1000} KB",
+            < 1000000000 => $"Deleted {deletedSize / 1000000} MB",
+            < 100000000000 => $"Deleted {deletedSize / 1000000000} GB",
+            _ => ""
+        };
+
+        return sizeMessage;
     }
 }

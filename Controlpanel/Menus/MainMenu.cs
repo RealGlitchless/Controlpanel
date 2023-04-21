@@ -6,61 +6,61 @@ using System.Threading;
 using Controlpanel.Menus.Casino;
 using Controlpanel.Model;
 
-namespace Controlpanel.Menus
+namespace Controlpanel.Menus;
+
+public class MainMenu
 {
-    public class MainMenu
-    {
-        [DllImport("kernel32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool GetPhysicallyInstalledSystemMemory(out long TotalMemoryInKilobytes);
+    [DllImport("kernel32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    static extern bool GetPhysicallyInstalledSystemMemory(out long TotalMemoryInKilobytes);
         
-        private readonly Account _account;
+    private readonly Account _account;
 
-        public MainMenu(Account account)
+    public MainMenu(Account account)
+    {
+        _account = account;
+    }
+
+    public void PrintMenu()
+    {
+        List<Preset> presets = _account.Presets;
+
+        Console.Clear();
+        // Menu
+        Console.WriteLine("Welcome to Soerensen's Controlpanel");
+        Console.WriteLine("***********************************");
+        Console.WriteLine("Logged in as: " + _account.Username);
+        Console.WriteLine("What do you want to do?");
+        int option = presets.Count;
+        for(int i = 0; i < option; i++)
         {
-            _account = account;
+            Console.Write($"{i+1}: ");
+            Console.WriteLine(presets[i].Name);
         }
-
-        public void PrintMenu()
+        Console.Write($"{option+1}: ");
+        Console.WriteLine("Create Preset");
+        Console.Write($"{option+2}: ");
+        Console.WriteLine("Clean PC");
+        Console.Write($"{option+3}: ");
+        Console.WriteLine("Enter Casino");
+        Console.Write($"{option+4}: ");
+        Console.WriteLine("See Hardware Information");
+        Console.Write($"{option+5}: ");
+        Console.WriteLine("Settings");
+        Console.Write($"{option+6}: ");
+        Console.WriteLine("Exit Controlpanel");
+        Console.Write($"{option+7}: ");
+        Console.WriteLine("Restart PC");
+        Console.Write($"{option+8}: ");
+        Console.WriteLine("Shutdown PC");
+        Console.WriteLine("***********************************");
+        while(!Console.KeyAvailable)
         {
-            List<Preset> presets = _account.Presets;
-
-            Console.Clear();
-            // Menu
-            Console.WriteLine("Welcome to Soerensen's Controlpanel");
-            Console.WriteLine("***********************************");
-            Console.WriteLine("Logged in as: " + _account.Username);
-            Console.WriteLine("What do you want to do?");
-            int option = presets.Count;
-            for(int i = 0; i < option; i++)
-            {
-                Console.Write($"{i+1}: ");
-                Console.WriteLine(presets[i].Name);
-            }
-            Console.Write($"{option+1}: ");
-            Console.WriteLine("Create Preset");
-            Console.Write($"{option+2}: ");
-            Console.WriteLine("Clean PC");
-            Console.Write($"{option+3}: ");
-            Console.WriteLine("Enter Casino");
-            Console.Write($"{option+4}: ");
-            Console.WriteLine("See Hardware Information");
-            Console.Write($"{option+5}: ");
-            Console.WriteLine("Settings");
-            Console.Write($"{option+6}: ");
-            Console.WriteLine("Exit Controlpanel");
-            Console.Write($"{option+7}: ");
-            Console.WriteLine("Restart PC");
-            Console.Write($"{option+8}: ");
-            Console.WriteLine("Shutdown PC");
-            Console.WriteLine("***********************************");
-            while(!Console.KeyAvailable)
-            {
-                Console.SetCursorPosition(0, option + 13);
-                printSystemInfo();
-            }
-            SelectOption();
+            Console.SetCursorPosition(0, option + 13);
+            PrintSystemInfo();
         }
+        SelectOption();
+    }
 
     private void SelectOption()
     {
@@ -97,7 +97,7 @@ namespace Controlpanel.Menus
         else if (selectedOption == option - 6)
         {
             // User selected "Clean PC"
-            new SystemCleanupMenu().Start();
+            SystemCleanupMenu.Start();
         }
         else if (selectedOption == option - 5)
         {
@@ -107,7 +107,7 @@ namespace Controlpanel.Menus
         else if (selectedOption == option - 4)
         {
             // User selected "See Hardware Information"
-            new SystemInfoMenu().PrintMenu();
+            SystemInfoMenu.PrintMenu();
         }
         else if (selectedOption == option - 3)
         {
@@ -117,17 +117,17 @@ namespace Controlpanel.Menus
         else if (selectedOption == option - 2)
         {
             // User selected "Exit Controlpanel"
-            exit();
+            Exit();
         }
         else if (selectedOption == option - 1)
         {
             // User selected "Restart PC"
-            restart();
+            Restart();
         }
         else if (selectedOption == option)
         {
             // User selected "Shutdown PC"
-            shutdown();
+            Shutdown();
         }
         else
         {
@@ -135,90 +135,83 @@ namespace Controlpanel.Menus
         }
     }
 
-    private void printSystemInfo()
-        {
-            // Gets the date and write
-            string day = DateTime.Today.ToString("D");
-            Console.WriteLine($"The date is {day}");
+    private static void PrintSystemInfo()
+    {
+        // Gets the date and write
+        string day = DateTime.Today.ToString("D");
+        Console.WriteLine($"The date is {day}");
 
-            // Gets the time and write
-            string time = DateTime.Now.ToString("T");
-            Console.WriteLine($"The current time is {time}");
+        // Gets the time and write
+        string time = DateTime.Now.ToString("T");
+        Console.WriteLine($"The current time is {time}");
 
-            // Prints values
-            Console.WriteLine($"CPU Load: " + getCpuProcent() + "%     ");
-            Console.WriteLine($"RAM Load: " + getRamProcent() + "%      ");
-            Thread.Sleep(500);
-        }
+        // Prints values
+        Console.WriteLine("CPU Load: " + GetCpuProcent() + "%     ");
+        Console.WriteLine("RAM Load: " + GetRamProcent() + "%      ");
+        Thread.Sleep(500);
+    }
 
-        private dynamic getRamProcent()
-        {
-            // Getting ram info
-            PerformanceCounter ramCounter = new PerformanceCounter
-            {
-                CategoryName = "Memory",
-                CounterName = "Available MBytes",
-                InstanceName = String.Empty
-            };
-            dynamic RamValue = ramCounter.NextValue();
+    private static dynamic GetRamProcent()
+    {
+        // Get available RAM in MB
+        PerformanceCounter ramCounter = new("Memory", "Available MBytes");
+        var availableRamInMb = ramCounter.NextValue();
 
-            // Getting total of ram
-            GetPhysicallyInstalledSystemMemory(out long memKb);
-            int memKbInt = Convert.ToInt32(memKb);
-            // Converting to mb
-            int TotalRaminMb = memKbInt / 1024;
+        // Getting total of ram
+        GetPhysicallyInstalledSystemMemory(out _);
 
-            // Convert to procent
-            dynamic RamProcent = 100 - (RamValue / TotalRaminMb) * 100;
-            return Math.Round(RamProcent);
-        }
+        // Get total RAM in MB
+        GetPhysicallyInstalledSystemMemory(out var totalRamInKb);
+        var totalRamInMb = Convert.ToInt32(totalRamInKb / 1024);
+
+        // Calculate and return RAM usage percentage
+        var ramPercentage = Math.Round((1 - availableRamInMb / totalRamInMb) * 100);
+        return ramPercentage;
+    }
         
-        private dynamic getCpuProcent()
-        {
-            // Getting Cpu info
-            PerformanceCounter cpuCounter = new PerformanceCounter
-            {
-                CategoryName = "Processor",
-                CounterName = "% Processor Time",
-                InstanceName = "_Total"
-            };
+    private static dynamic GetCpuProcent()
+    {
+        // Getting Cpu info
+        PerformanceCounter cpuCounter = new("Processor", "% Processor Time", "_Total");
 
-            // Get first value from CPU which is always 0
-            dynamic _ = cpuCounter.NextValue();
-            Thread.Sleep(500);
-            // Call again to get an actual value
-            dynamic secondValue = cpuCounter.NextValue();
-            return Math.Round(secondValue);
-        }
+        // Get first value from CPU which is always 0
+        var _ = cpuCounter.NextValue();
 
-        private void exit()
-        {
-            Console.Clear();
-            Environment.Exit(0);
-        }
+        // Wait for the counter to get an actual value
+        Thread.Sleep(500);
+
+        // Get the second value from the CPU counter
+        var secondValue = cpuCounter.NextValue();
+        var cpuPercentage = Math.Round(secondValue);
+
+        return cpuPercentage;
+    }
+
+    private static void Exit()
+    {
+        Console.Clear();
+        Environment.Exit(0);
+    }
         
-        private void restart()
+    private static void Restart()
+    {
+        Console.Clear();
+        Console.WriteLine("Your PC will now restart, press ESC to cancel. Press any other key to continue");
+        var esc = Console.ReadKey();
+        if (esc.Key != ConsoleKey.Escape)
         {
-            Console.Clear();
-            Console.WriteLine("Your PC will now restart, press ESC to cancel. Press any other key to continue");
-            ConsoleKeyInfo esc;
-            esc = Console.ReadKey();
-            if (esc.Key != ConsoleKey.Escape)
-            {
-                Process.Start("ShutDown", "/r /t 0");
-            }
+            Process.Start("ShutDown", "/r /t 0");
         }
+    }
         
-        private void shutdown()
+    private static void Shutdown()
+    {
+        Console.Clear();
+        Console.WriteLine("Your PC will now shut down, press ESC to cancel. Press any other key to continue");
+        var esc = Console.ReadKey();
+        if (esc.Key != ConsoleKey.Escape)
         {
-            Console.Clear();
-            Console.WriteLine("Your PC will now shut down, press ESC to cancel. Press any other key to continue");
-            ConsoleKeyInfo esc;
-            esc = Console.ReadKey();
-            if (esc.Key != ConsoleKey.Escape)
-            {
-                Process.Start("ShutDown", "/s /t 0");
-            }
+            Process.Start("ShutDown", "/s /t 0");
         }
     }
 }

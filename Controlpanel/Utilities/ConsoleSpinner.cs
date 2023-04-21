@@ -1,42 +1,41 @@
 ﻿using System;
 
-namespace Controlpanel.Utilities
+namespace Controlpanel.Utilities;
+
+public class ConsoleSpinner
 {
-    public class ConsoleSpinner
+    private int _currentAnimationFrame;
+
+    public ConsoleSpinner()
     {
-        private int _currentAnimationFrame;
-
-        public ConsoleSpinner()
+        SpinnerAnimationFrames = new[]
         {
-            SpinnerAnimationFrames = new[]
-            {
-                '|',
-                '/',
-                '-',
-                '\\'
-            };
+            '|',
+            '/',
+            '-',
+            '\\'
+        };
+    }
+
+    private char[] SpinnerAnimationFrames { get; set; }
+
+    public void UpdateProgress()
+    {
+        // Store the current position of the cursor
+        var originalX = Console.CursorLeft;
+        var originalY = Console.CursorTop;
+
+        // Write the next frame (character) in the spinner animation
+        Console.Write(SpinnerAnimationFrames[_currentAnimationFrame]);
+
+        // Keep looping around all the animation frames
+        _currentAnimationFrame++;
+        if (_currentAnimationFrame == SpinnerAnimationFrames.Length)
+        {
+            _currentAnimationFrame = 0;
         }
 
-        private char[] SpinnerAnimationFrames { get; set; }
-
-        public void UpdateProgress()
-        {
-            // Store the current position of the cursor
-            var originalX = Console.CursorLeft;
-            var originalY = Console.CursorTop;
-
-            // Write the next frame (character) in the spinner animation
-            Console.Write(SpinnerAnimationFrames[_currentAnimationFrame]);
-
-            // Keep looping around all the animation frames
-            _currentAnimationFrame++;
-            if (_currentAnimationFrame == SpinnerAnimationFrames.Length)
-            {
-                _currentAnimationFrame = 0;
-            }
-
-            // Restore cursor to original position
-            Console.SetCursorPosition(originalX, originalY);
-        }
+        // Restore cursor to original position
+        Console.SetCursorPosition(originalX, originalY);
     }
 }

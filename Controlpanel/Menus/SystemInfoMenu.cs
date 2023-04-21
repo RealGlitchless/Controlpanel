@@ -1,144 +1,118 @@
 ﻿using System;
+using System.Linq;
 using System.Management;
 
-namespace Controlpanel.Menus
+namespace Controlpanel.Menus;
+
+public static class SystemInfoMenu
 {
-    public class SystemInfoMenu
+    public static void PrintMenu()
     {
-        public void PrintMenu()
-        {
-            while (true)
-            {
-                Console.Clear();
-                Console.WriteLine("Here is everything about your PC");
-                Console.WriteLine("***********************************");
-                Console.WriteLine("1: OS");
-                Console.WriteLine("2: CPU");
-                Console.WriteLine("3: GPU");
-                Console.WriteLine("4: Motherboard");
-                Console.WriteLine("5: RAM");
-                Console.WriteLine("6: Disks");
-                Console.WriteLine("0: Go back");
-                Console.WriteLine("Press a number between 1-6 to get more info");
-                Console.WriteLine("***********************************\n");
-                char option = Console.ReadKey().KeyChar;
-                if (option == '0')
-                    break;
-                Console.SetCursorPosition(0, 11);
-                PrintOptions(option);
-                Console.WriteLine("***********************************\n");
-                Console.WriteLine("Press anything to return to menu");
-                char _ = Console.ReadKey().KeyChar;
-            }
-        }
+        Console.Clear();
+        Console.WriteLine("Here is everything about your PC.");
+        Console.WriteLine("***********************************");
+        PrintSystemInfo();
+        Console.WriteLine("***********************************\n");
+        Console.WriteLine("Press any key to go back");
+        var _ = Console.ReadKey().KeyChar;
+            
+    }
 
-        private void PrintOptions(char option)
-        {
-            switch (option)
-            {
-                case '1':
-                    PrintOS();
-                    break;
-
-                case '2':
-                    PrintCPU();
-                    break;
-
-                case '3':
-                    PrintGPU();
-                    break;
-
-                case '4':
-                    PrintMotherboard();
-                    break;
-
-                case '5':
-                    PrintRAM();
-                    break;
-
-                case '6':
-                    PrintDisk();
-                    break;
-
-                default:
-                    Console.WriteLine("Please press a valid key");
-                    break;
-            }
-        }
         
-        private void PrintOS()
+    private static void PrintSystemInfo()
+    {
+        Console.WriteLine("\n*************** OS ****************\n");
+        PrintOSInfo();
+        Console.WriteLine("\n*************** CPU ***************\n");
+        PrintCPUInfo();
+        Console.WriteLine("\n*************** GPU ***************\n");
+        PrintGPUInfo();
+        Console.WriteLine("\n*********** Motherboard ***********\n");
+        PrintMotherboardInfo();
+        Console.WriteLine("\n*************** RAM ***************\n");
+        PrintRAMInfo();
+        Console.WriteLine("\n*************** HDD ***************\n");
+        PrintDiskInfo();
+    }
+
+    private static void PrintOSInfo()
+    {
+        var osQuery = new ManagementObjectSearcher("SELECT * FROM Win32_OperatingSystem");
+        var os = osQuery.Get().Cast<ManagementObject>().FirstOrDefault();
+
+        if (os == null) return;
+        Console.WriteLine("OS Name: " + os["Caption"]);
+        Console.WriteLine("Version: " + os["Version"]);
+        Console.WriteLine("Build Number: " + os["BuildNumber"]);
+    }
+
+    private static void PrintCPUInfo()
+    {
+        var cpuQuery = new ManagementObjectSearcher("SELECT * FROM Win32_Processor");
+        var cpu = cpuQuery.Get().Cast<ManagementObject>().FirstOrDefault();
+
+        if (cpu == null) return;
+        Console.WriteLine("Name: " + cpu["Name"]);
+        Console.WriteLine("Manufacturer: " + cpu["Manufacturer"]);
+        Console.WriteLine("Number of cores: " + cpu["NumberOfCores"]);
+        Console.WriteLine("Number of logical processors: " + cpu["NumberOfLogicalProcessors"]);
+        Console.WriteLine("Max clock speed: " + cpu["MaxClockSpeed"]);
+    }
+
+    private static void PrintGPUInfo()
+    {
+        var gpuQuery = new ManagementObjectSearcher("SELECT * FROM Win32_VideoController");
+        var gpu = gpuQuery.Get().Cast<ManagementObject>().FirstOrDefault();
+
+        if (gpu == null) return;
+        Console.WriteLine("Name: " + gpu["Name"]);
+        Console.WriteLine("Manufacturer: " + gpu["AdapterCompatibility"]);
+        Console.WriteLine("Video Processor: " + gpu["VideoProcessor"]);
+        Console.WriteLine("Video Memory Type: " + gpu["VideoMemoryType"]);
+        Console.WriteLine("Video Memory: " + gpu["AdapterRAM"]);
+    }
+
+    private static void PrintMotherboardInfo()
+    {
+        var motherboardQuery = new ManagementObjectSearcher("SELECT * FROM Win32_BaseBoard");
+        var motherboard = motherboardQuery.Get().Cast<ManagementObject>().FirstOrDefault();
+
+        if (motherboard == null) return;
+        Console.WriteLine("Product: " + motherboard["Product"]);
+        Console.WriteLine("Manufacturer: " + motherboard["Manufacturer"]);
+        Console.WriteLine("Serial Number: " + motherboard["SerialNumber"]);
+        Console.WriteLine("Version: " + motherboard["Version"]);
+    }
+
+    private static void PrintRAMInfo()
+    {
+        var ramQuery = new ManagementObjectSearcher("SELECT * FROM Win32_PhysicalMemory");
+        var ramModules = ramQuery.Get().Cast<ManagementObject>();
+
+        foreach (var ramModule in ramModules)
         {
-            ManagementObjectSearcher os = new ManagementObjectSearcher("SELECT * FROM Win32_OperatingSystem");
-            foreach (ManagementBaseObject win in os.Get())
-            {
-                Console.WriteLine("OS Name: " + win["Caption"]);
-                Console.WriteLine("Version: " + win["Version"]);
-                Console.WriteLine("Build Number: " + win["BuildNumber"]);
-            }
+            Console.WriteLine("Name: " + ramModule["Name"]);
+            Console.WriteLine("Manufacturer: " + ramModule["Manufacturer"]);
+            Console.WriteLine("Capacity: " + ramModule["Capacity"]);
+            Console.WriteLine("Speed: " + ramModule["Speed"]);
+            Console.WriteLine("");
         }
-        
-        private void PrintCPU()
+    }
+
+    private static void PrintDiskInfo()
+    {
+        var diskQuery = new ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive");
+        var disks = diskQuery.Get().Cast<ManagementObject>();
+
+        foreach (var disk in disks)
         {
-            ManagementObjectSearcher cpu = new ManagementObjectSearcher("SELECT * FROM Win32_Processor");
-            foreach (ManagementBaseObject cpuinfo in cpu.Get())
-            {
-                Console.WriteLine("Name: " + cpuinfo["Name"]);
-                Console.WriteLine("Manufacturer: " + cpuinfo["Manufacturer"]);
-                Console.WriteLine("Number of cores: " + cpuinfo["NumberOfCores"]);
-                Console.WriteLine("Number of logical processors: " + cpuinfo["NumberOfLogicalProcessors"]);
-                Console.WriteLine("Max clock speed: " + cpuinfo["MaxClockSpeed"]);
-            }
-        }
-        
-        private void PrintGPU()
-        {
-            ManagementObjectSearcher videocontroller =
-                new ManagementObjectSearcher("SELECT * FROM Win32_VideoController");
-            foreach (ManagementBaseObject videocard in videocontroller.Get())
-            {
-                Console.WriteLine("Name: " + videocard["Name"]);
-                Console.WriteLine("Manufacturer: " + videocard["AdapterCompatibility"]);
-                Console.WriteLine("Video Processor: " + videocard["VideoProcessor"]);
-                Console.WriteLine("Video Memory Type: " + videocard["VideoMemoryType"]);
-                Console.WriteLine("Video Memory: " + videocard["AdapterRAM"]);
-            }
-        }
-        
-        private void PrintMotherboard()
-        {
-            ManagementObjectSearcher motherboard = new ManagementObjectSearcher("SELECT * FROM Win32_BaseBoard");
-            foreach (ManagementBaseObject modbinfo in motherboard.Get())
-            {
-                Console.WriteLine("Product: " + modbinfo["Product"]);
-                Console.WriteLine("Manufacturer: " + modbinfo["Manufacturer"]);
-                Console.WriteLine("Serial Number: " + modbinfo["SerialNumber"]);
-                Console.WriteLine("Version: " + modbinfo["Version"]);
-            }
-        }
-        
-        private void PrintRAM()
-        {
-            ManagementObjectSearcher ram = new ManagementObjectSearcher("SELECT * FROM Win32_PhysicalMemory");
-            foreach (ManagementBaseObject raminfo in ram.Get())
-            {
-                Console.WriteLine("Name: " + raminfo["Name"]);
-                Console.WriteLine("Manufacturer: " + raminfo["Manufacturer"]);
-                Console.WriteLine("Capacity: " + raminfo["Capacity"]);
-                Console.WriteLine("Speed: " + raminfo["Speed"]);
-            }
-        }
-        
-        private void PrintDisk()
-        {
-            ManagementObjectSearcher dsk = new ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive");
-            foreach (ManagementBaseObject disk in dsk.Get())
-            {
-                Console.WriteLine("Caption: " + disk["Caption"]);
-                Console.WriteLine("Manufacturer: " + disk["Manufacturer"]);
-                Console.WriteLine("Model: " + disk["Model"]);
-                Console.WriteLine("Serial Number: " + disk["SerialNumber"]);
-                Console.WriteLine("Size: " + disk["Size"]);
-            }
+            Console.WriteLine("Caption: " + disk["Caption"]);
+            Console.WriteLine("Manufacturer: " + disk["Manufacturer"]);
+            Console.WriteLine("Model: " + disk["Model"]);
+            Console.WriteLine("Serial Number: " + disk["SerialNumber"]);
+            Console.WriteLine("Size: " + disk["Size"]);
+            Console.WriteLine("Interface Type: " + disk["InterfaceType"]);
+            Console.WriteLine("");
         }
     }
 }
