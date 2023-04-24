@@ -54,8 +54,6 @@ public class CasinoMenu
         {
             default:
             {
-                Thread.Sleep(500);
-                Console.WriteLine("");
                 Console.WriteLine("Please enter a valid number");
                 Thread.Sleep(1000);
                 break;

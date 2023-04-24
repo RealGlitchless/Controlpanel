@@ -8,7 +8,7 @@ namespace Controlpanel.Menus.Casino;
 public class Dice
 {
     private readonly Account _user;
-    private readonly CasinoController _casinoController = new CasinoController();
+    private readonly CasinoController _casinoController = new();
         
     public Dice(Account user)
     {
@@ -24,7 +24,7 @@ public class Dice
             Console.WriteLine("How much do you want to bet? Type 0 to go back");
                 
 
-            long bet = _casinoController.PlaceBetMenu();
+            long bet = CasinoController.PlaceBetMenu();
             if(bet == 0)
                 return;
 
@@ -52,14 +52,15 @@ public class Dice
 
         Console.Clear();
         Console.WriteLine("Which number do you want to bet on?");
-        int number = Int32.Parse(Console.ReadKey().KeyChar.ToString());
+        int number = int.Parse(Console.ReadKey().KeyChar.ToString());
             
 
-        if (number > 6 || number < 1)
+        if (number is > 6 or < 1)
         {
-            Console.WriteLine("");
             Console.WriteLine("Your number is too high, try again. Your number has to be 6 or less");
-            Thread.Sleep(700);
+            _casinoController.ReturnBet(_user, bet);
+            Thread.Sleep(1000);
+            return;
         }
 
         Thread.Sleep(200);
@@ -79,16 +80,15 @@ public class Dice
             Console.WriteLine("You win");
             _casinoController.Win(_user, bet, 6);
         }
-
         else
         {
             Console.WriteLine("You lose");
         }
     }
 
-    private void Rolling()
+    private static void Rolling()
     {
-        for(int i = 0; i < 3; i++)
+        for(int i = 0; i < 2; i++)
         {
             Console.Write("Rolling");
             Thread.Sleep(100);

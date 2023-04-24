@@ -12,7 +12,7 @@ public class CasinoController
         _accountController = new AccountController();
     }
 
-    public long PlaceBetMenu()
+    public static long PlaceBetMenu()
     {
         string num = "";
 
@@ -24,11 +24,9 @@ public class CasinoController
             if (chr.Key != ConsoleKey.Backspace)
             {
                 bool control = double.TryParse(chr.KeyChar.ToString(), out _);
-                if (control)
-                {
-                    num += chr.KeyChar;
-                    Console.Write(chr.KeyChar);
-                }
+                if (!control) continue;
+                num += chr.KeyChar;
+                Console.Write(chr.KeyChar);
             }
             else if (chr.Key == ConsoleKey.Backspace && num.Length > 0)
             {
@@ -37,7 +35,7 @@ public class CasinoController
             }
         } while (chr.Key != ConsoleKey.Enter);
 
-        return Int64.Parse(num);
+        return long.Parse(num);
     }
         
     public bool PlaceBet(Account user, long bet)
@@ -55,6 +53,12 @@ public class CasinoController
     public void Win(Account user, long bet, float multiplier)
     {
         user.Balance += (long) (bet * multiplier);
+        _accountController.UpdateAccount(user);
+    }
+
+    public void ReturnBet(Account user, long bet)
+    {
+        user.Balance += bet;
         _accountController.UpdateAccount(user);
     }
 }

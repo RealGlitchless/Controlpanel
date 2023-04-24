@@ -23,7 +23,7 @@ public class Slots
         Console.WriteLine("Welcome to Slots");
         Console.WriteLine("How much do you want to bet per spin?");
 
-        long bet = _casinoController.PlaceBetMenu();
+        long bet = CasinoController.PlaceBetMenu().ReturnValue;
             
         Console.WriteLine(
             "CAUTION: if you leave while playing a game that haven't ended yet, you will lose your money");
