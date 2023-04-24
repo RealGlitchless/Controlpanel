@@ -1,15 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using Controlpanel.Controller;
 using Controlpanel.Model;
 
 namespace Controlpanel.Menus;
 
 public class AccountMenu
 {
-    private readonly Account _user;
-        
+    private static Account _user;
+    private readonly PresetController _presetController;
     public AccountMenu(Account user)
     {
         _user = user;
+        _presetController = new PresetController(_user);
     }
 
     public void PrintMenu()
@@ -52,23 +57,33 @@ public class AccountMenu
         {
             Console.Clear();
             Console.WriteLine("What preset do you want to change?");
-            for(int i = 0; i < _user.Presets.Count; i++)
+            List<Preset> presets = _presetController.GetAll();
+            for(int i = 0; i < presets.Count; i++)
             {
                 Console.Write(i + 1);
                 Console.Write(": ");
-                Console.WriteLine(_user.Presets[i].Name);
+                Console.WriteLine(presets[i].Name);
             }
             Console.WriteLine("0: Go back");
-            Console.WriteLine("Press a number between 1-10 to get more info");
             Console.WriteLine("\n***********************************\n");
             char option = Console.ReadKey().KeyChar;
             if (option == '0')
                 return;
-            new EditPresetMenu(_user).PrintMenu();
+            int index = int.Parse(option.ToString()) - 1;
+
+            if (index < 0 || presets.Count < index)
+            {
+                Console.WriteLine("Invalid choice");
+                Thread.Sleep(500);
+                return;
+            }
+
+            EditPresetMenu editPresetMenu = new EditPresetMenu(_user, presets[index]);
+            editPresetMenu.PrintMenu();
         }
     }
         
-    private void ChangePassword()
+    private static void ChangePassword()
     {
         Console.Clear();
         Console.WriteLine("What is your current password?");

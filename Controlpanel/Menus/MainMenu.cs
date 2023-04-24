@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Controlpanel.Controller;
 using Controlpanel.Menus.Casino;
 using Controlpanel.Model;
 
@@ -14,28 +15,30 @@ public class MainMenu
     [return: MarshalAs(UnmanagedType.Bool)]
     static extern bool GetPhysicallyInstalledSystemMemory(out long TotalMemoryInKilobytes);
         
-    private readonly Account _account;
+    private static Account _account;
+    private static List<Preset> _presets;
 
     public MainMenu(Account account)
     {
         _account = account;
+        var presetController = new PresetController(_account);
+        _presets = presetController.GetAll();
     }
 
     public void PrintMenu()
     {
-        List<Preset> presets = _account.Presets;
-
         Console.Clear();
         // Menu
         Console.WriteLine("Welcome to Soerensen's Controlpanel");
         Console.WriteLine("***********************************");
         Console.WriteLine("Logged in as: " + _account.Username);
         Console.WriteLine("What do you want to do?");
-        int option = presets.Count;
+        
+        int option = _presets.Count;
         for(int i = 0; i < option; i++)
         {
             Console.Write($"{i+1}: ");
-            Console.WriteLine(presets[i].Name);
+            Console.WriteLine(_presets[i].Name);
         }
         Console.Write($"{option+1}: ");
         Console.WriteLine("Create Preset");
@@ -62,10 +65,9 @@ public class MainMenu
         SelectOption();
     }
 
-    private void SelectOption()
+    private static void SelectOption()
     {
-        var presets = _account.Presets;
-        var option = presets.Count + 8; // Number of options in the menu
+        var option = _presets.Count + 8; // Number of options in the menu
         var selectedOption = 0;
 
         while (selectedOption < 1 || selectedOption > option)
@@ -83,10 +85,10 @@ public class MainMenu
         }
 
         // Handle the selected option
-        if (selectedOption <= presets.Count)
+        if (selectedOption <= _presets.Count)
         {
             // User selected a preset
-            var preset = presets[selectedOption - 1];
+            var preset = _presets[selectedOption - 1];
             Process.Start(preset.URL);
         }
         else if (selectedOption == option - 7)

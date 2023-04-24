@@ -8,8 +8,8 @@ namespace Controlpanel.Menus.Casino;
 public class Slots
 {
     private Account _user;
-    private readonly CasinoController _casinoController = new CasinoController();
-    private readonly AccountController _accountController = new AccountController();
+    private readonly CasinoController _casinoController = new();
+    private readonly AccountController _accountController = new();
 
     public Slots(Account user)
     {
@@ -23,7 +23,7 @@ public class Slots
         Console.WriteLine("Welcome to Slots");
         Console.WriteLine("How much do you want to bet per spin?");
 
-        long bet = CasinoController.PlaceBetMenu().ReturnValue;
+        long bet = CasinoController.PlaceBetMenu();
             
         Console.WriteLine(
             "CAUTION: if you leave while playing a game that haven't ended yet, you will lose your money");
@@ -79,42 +79,35 @@ public class Slots
             if (firstIcon == secondIcon && secondIcon == thirdIcon && thirdIcon == fourthIcon &&
                 fourthIcon == fifthIcon)
             {
-                int multiplier = 1000;
-                Win(bet, multiplier);
+                Win(bet, 1000);
             }
 
             //X-X-X-X-Y
             else if (firstIcon == secondIcon && secondIcon == thirdIcon && thirdIcon == fourthIcon)
             {
-                int multiplier = 100;
-                Win(bet, multiplier);
+                Win(bet, 100);
             }
 
             //X-X-X-Y-Y
             else if (firstIcon == secondIcon && secondIcon == thirdIcon && fourthIcon == fifthIcon)
             {
-                int multiplier = 50;
-                Win(bet, multiplier);
+                Win(bet, 50);
             }
 
             else if (firstIcon == secondIcon && thirdIcon == fourthIcon && fourthIcon == fifthIcon)
             { 
-                int multiplier = 10;
-                Win(bet, multiplier);
+                Win(bet, 10);
             }
 
             //X-X-Y-Y-Z
             else if (firstIcon == secondIcon)
             {
-                int multiplier;
                 if (thirdIcon == fourthIcon)
                 {
-                    multiplier = 5;
-                    Win(bet, multiplier);
+                    Win(bet, 5);
                 }
 
-                multiplier = 2;
-                Win(bet, multiplier);
+                Win(bet, 2);
             }
         }
     }
@@ -123,7 +116,7 @@ public class Slots
     {
         Console.SetCursorPosition(0, 10);
 
-        if (isJackpot())
+        if (IsJackpot())
         {
             Console.WriteLine("Congratulations! You won the jackpot!");
             multiplier *= 100;
@@ -132,11 +125,11 @@ public class Slots
         _casinoController.Win(_user , bet, multiplier);
     }
         
-    private char GetSymbol(int x)
+    private static char GetSymbol(int x)
     {
         string symbols = Symbols();
 
-        Random rndNumber = new Random();
+        Random rndNumber = new();
         char symbol = ' '; 
         for (int i = 0; i < 5; i++)
         {
@@ -150,9 +143,9 @@ public class Slots
         return symbol;
     }
 
-    private bool isJackpot()
+    private static bool IsJackpot()
     {
-        Random rnd = new Random();
+        Random rnd = new();
 
         int userNum = 0;
         int jackpotNum = 0;
@@ -171,7 +164,7 @@ public class Slots
         return userNum == jackpotNum;
     }
 
-    private string Symbols()
+    private static string Symbols()
     {
         return "€&7¤#%§½@=+";
     }
